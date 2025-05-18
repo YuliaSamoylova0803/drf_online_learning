@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
 
+from materials.models import Course, Lesson
+
 
 class User(AbstractUser):
     email = models.EmailField(
@@ -50,3 +52,27 @@ class User(AbstractUser):
     class Meta:
         verbose_name = "пользователь"
         verbose_name_plural = "пользователи"
+
+
+class Payment(models.Model):
+    PAYMENT_METHOD_CHOICES = [
+        ('cash', 'Наличные'),
+        ('transfer', 'Перевод на счет'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь",
+                             related_name="payments")
+    date_of_payment = models.DateTimeField(auto_now_add=True, verbose_name="Дата платежа")
+    paid_course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Оплаченный курс", related_name="payments")
+
+    paid_lesson = models.ForeignKey(Lesson, on_delete=models.SET_NULL, null=True, blank=True,
+                                verbose_name="Оплаченный урок", related_name="payments")
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Суммам оплаты")
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, verbose_name="Способ оплаты")
+
+    class Meta:
+        verbose_name = "платеж"
+        verbose_name_plural = "платежи"
+        ordering = ['-date_of_payment']
+
+    def __str__(self):
+        return f"{self.user.email} - {self.amount} ({self.date_of_payment})"
