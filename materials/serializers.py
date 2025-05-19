@@ -1,9 +1,10 @@
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
+from django_filters.rest_framework import DjangoFilterBackend
 from users.models import Payment
 from .models import Course, Lesson
-
+from rest_framework.filters import OrderingFilter
 
 class CourseSerializer(serializers.ModelSerializer):
 
@@ -43,19 +44,3 @@ class CourseDetailSerializer(serializers.ModelSerializer):
         return instance.lessons.count() # Используем related_name 'lessons' из модели Lesson
 
 
-class PaymentSerializer(serializers.ModelSerializer):
-    paid_course = CourseSerializer(read_only=True)
-    paid_lesson = LessonSerializer(read_only=True)
-
-    class Meta:
-        model = Payment
-        fields = [
-            'id',
-            'user',
-            'date_of_payment',
-            'paid_course',
-            'paid_lesson',
-            'amount',
-            'payment_method'
-        ]
-        read_only_fields = ['payment_date']
