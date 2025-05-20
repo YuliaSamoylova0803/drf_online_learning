@@ -1,13 +1,9 @@
-from os import getenv
-
-from django.core.serializers import serialize
-from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, permissions
 from rest_framework.filters import OrderingFilter
-
+from rest_framework.generics import CreateAPIView
 from .models import User, Payment
-from .serializers import UserProfileSerializer, PaymentHistorySerializer, PaymentSerializer
+from .serializers import UserProfileSerializer, PaymentHistorySerializer, PaymentSerializer, UserSerializer
 from rest_framework.response import Response
 
 
@@ -41,3 +37,13 @@ class PaymentViewSet(viewsets.ModelViewSet):
 
     # Сортировка по умолчанию (если не указан параметр `ordering`)
     ordering = ["-date_of_payment"]  # Новые платежи сначала
+
+
+class UserCreateAPIView(CreateAPIView):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+
+    def perform_create(self, serializer):
+        user = serializer.save(is_active=True)
+        user.set_password(user.password)
+        user.save()
