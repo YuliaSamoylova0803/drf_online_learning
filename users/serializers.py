@@ -1,6 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import serializers
 from rest_framework.filters import OrderingFilter
+from rest_framework.serializers import ModelSerializer
 
 from materials.serializers import CourseSerializer, LessonSerializer
 from users.models import User, Payment
@@ -42,5 +43,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'email']
 
 
+class UserSerializer(ModelSerializer):
 
-
+    class Meta:
+        model = User
+        fields = "__all__"
