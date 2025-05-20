@@ -1,11 +1,46 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import serializers
-from .models import User
+from rest_framework.filters import OrderingFilter
+
+from materials.serializers import CourseSerializer, LessonSerializer
+from users.models import User, Payment
+
+
+class PaymentHistorySerializer(serializers.ModelSerializer):
+    paid_course = CourseSerializer(read_only=True)
+    paid_lesson = LessonSerializer(read_only=True)
+
+
+    class Meta:
+        model = Payment
+        fields = [
+            'id',
+            'user',
+            'date_of_payment',
+            'paid_course',
+            'paid_lesson',
+            'amount',
+            'payment_method'
+        ]
+
+
+# Основной сериализатор платежей (может использоваться в других местах)
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = '__all__'
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    payments = PaymentHistorySerializer(many=True, read_only=True, source="payments.all")
 
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'phone_number',
-                  'city', 'avatar', 'tg_nick']
+                  'city', 'avatar', 'tg_nick', 'payments']
+
         read_only_fields = ['id', 'email']
+
+
+
+
