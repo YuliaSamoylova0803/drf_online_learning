@@ -11,7 +11,7 @@ class IsModerPermission(permissions.BasePermission):
 class IsOwnerOrStaff(BasePermission):
 
     def has_permission(self, request, view):
-        if request.user.is_staff:
-            return True
+        return request.user.is_authenticated
 
-        return request.user == view.get_object().owner
+    def has_object_permission(self, request, view, obj):
+        return request.user.is_staff or obj.owner == request.user
