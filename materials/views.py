@@ -1,4 +1,6 @@
 from django.shortcuts import render
+
+from users.permissions import IsModerPermission
 from .models import Course, Lesson
 from .serializers import CourseSerializer, LessonSerializer, CourseDetailSerializer
 from rest_framework import viewsets, generics
@@ -12,6 +14,13 @@ class CourseViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             return CourseDetailSerializer
         return CourseSerializer
+
+    def get_permissions(self):
+        if self.action in ["create", "destroy"]:
+            self.permission_classes = (~IsModerPermission,)
+        elif self.action in ["update", "retrieve"]:
+            self.permission_classes = (IsModerPermission,)
+        return super().get_permissions()
 
 
 class LessonCreateAPIView(generics.CreateAPIView):
