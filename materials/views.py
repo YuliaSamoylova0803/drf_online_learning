@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from users.permissions import IsModerPermission
 from .models import Course, Lesson
@@ -26,21 +27,23 @@ class CourseViewSet(viewsets.ModelViewSet):
 class LessonCreateAPIView(generics.CreateAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
+    permission_classes = [IsAuthenticated]
 
 class LessonListAPIView(generics.ListAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-
+    permission_classes = (AllowAny,)
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-
+    permission_classes = [IsAuthenticated, IsModerPermission]
 
 class LessonUpdateAPIView(generics.UpdateAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-
+    permission_classes = [IsAuthenticated, IsModerPermission]
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
     queryset = Lesson.objects.all()
+    permission_classes = [IsAuthenticated]
