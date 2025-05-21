@@ -17,40 +17,52 @@ class CourseViewSet(viewsets.ModelViewSet):
         return CourseSerializer
 
     def get_permissions(self):
-        if self.action in ["create", "destroy"]:
-            self.permission_classes = (~IsModerPermission,)
-        elif self.action in ["update", "retrieve"]:
-            self.permission_classes = (IsModerPermission,)
+        if self.action == "create":
+            self.permission_classes = [IsAuthenticated, ~IsModerPermission]
+        elif self.action == "destroy":
+            self.permission_classes = [IsAuthenticated, ~IsModerPermission, IsOwnerOrStaff]
+        elif self.action in ["update", "partial_update"]:
+            self.permission_classes = [IsAuthenticated, IsModerPermission | IsOwnerOrStaff]
+        elif self.action == "retrieve":
+            self.permission_classes = [IsAuthenticated]
         return super().get_permissions()
 
     def perform_create(self, serializer):
-        new_course = serializer.save()
-        new_course.owner = self.request.user
-        new_course.save()
+        serializer.save(owner=self.request.user)
 
 
 class LessonCreateAPIView(generics.CreateAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = [IsAuthenticated, ~IsModerPermission, IsOwnerOrStaff]
+    permission_classes = [IsAuthenticated, ~IsModerPermission]
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
+
 class LessonListAPIView(generics.ListAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = (AllowAny, IsOwnerOrStaff)
+    permission_classes = (AllowAny,)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        course_id = self.kwargs.get('course_id')
+        if course_id:
+            queryset = queryset.filter(course_id=course_id)
+        return queryset
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
     permission_classes = [IsAuthenticated, IsModerPermission | IsOwnerOrStaff]
 
+
 class LessonUpdateAPIView(generics.UpdateAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
     permission_classes = [IsAuthenticated, IsModerPermission | IsOwnerOrStaff]
+
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
     queryset = Lesson.objects.all()
