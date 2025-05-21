@@ -32,6 +32,14 @@ class PaymentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class OtherUserProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "city", "avatar", "tg_nick"]
+        read_only_fields = fields
+
+
 class UserProfileSerializer(serializers.ModelSerializer):
     payments = PaymentHistorySerializer(many=True, read_only=True, source="payments.all")
 
