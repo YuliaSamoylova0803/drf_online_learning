@@ -4,7 +4,6 @@ from users.apps import UsersConfig
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from .serializers import UserProfileSerializer
 from .views import UserProfileViewSet, PaymentViewSet, UserCreateAPIView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -15,12 +14,19 @@ app_name = UsersConfig.name
 
 router = DefaultRouter()
 router.register(r"users", UserProfileViewSet, basename="user")
-router.register(r"payments", PaymentViewSet, basename='payments')
+router.register(r"payments", PaymentViewSet, basename="payments")
 
 urlpatterns = [
-    path("users/me/", UserProfileViewSet.as_view({'get': 'me'}), name="user-me"),
-    path("register/", UserCreateAPIView.as_view(permission_classes=(AllowAny,)), name="register"),
+    path("users/me/", UserProfileViewSet.as_view({"get": "me"}), name="user-me"),
+    path(
+        "register/",
+        UserCreateAPIView.as_view(permission_classes=(AllowAny,)),
+        name="register",
+    ),
     path("login/", TokenObtainPairView.as_view(), name="login"),
-    path("token/refresh/", TokenRefreshView.as_view(permission_classes=(AllowAny,)), name="token_refresh"),
-
+    path(
+        "token/refresh/",
+        TokenRefreshView.as_view(permission_classes=(AllowAny,)),
+        name="token_refresh",
+    ),
 ] + router.urls

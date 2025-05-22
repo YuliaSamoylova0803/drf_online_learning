@@ -1,5 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.generics import CreateAPIView
@@ -8,7 +8,6 @@ from .permissions import IsOwnerOrStaff
 from .models import User, Payment
 from .serializers import (
     UserProfileSerializer,
-    PaymentHistorySerializer,
     PaymentSerializer,
     UserSerializer,
     OtherUserProfileSerializer,

@@ -15,11 +15,11 @@ class IsOwnerOrStaff(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         """
-                Разрешаем:
-                - Полный доступ для staff
-                - Редактирование только своего профиля для обычных пользователей
+        Разрешаем:
+        - Полный доступ для staff
+        - Редактирование только своего профиля для обычных пользователей
         """
-        if view.action == 'retrieve':
+        if view.action == "retrieve":
             # Просмотр профиля разрешен всем аутентифицированным
             return True
         return request.user.is_staff or obj == request.user

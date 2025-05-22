@@ -14,7 +14,6 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
-from django.conf.global_settings import AUTH_USER_MODEL, STATIC_ROOT
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
@@ -81,12 +80,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
         # Другие классы аутентификации при необходимости
     ),
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',  # IsAuthenticated, AllowAny - это permission!
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",  # IsAuthenticated, AllowAny - это permission!
     ],
 }
 

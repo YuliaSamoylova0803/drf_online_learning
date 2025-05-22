@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from users.permissions import IsModerPermission, IsOwnerOrStaff
@@ -20,9 +19,16 @@ class CourseViewSet(viewsets.ModelViewSet):
         if self.action == "create":
             self.permission_classes = [IsAuthenticated, ~IsModerPermission]
         elif self.action == "destroy":
-            self.permission_classes = [IsAuthenticated, ~IsModerPermission, IsOwnerOrStaff]
+            self.permission_classes = [
+                IsAuthenticated,
+                ~IsModerPermission,
+                IsOwnerOrStaff,
+            ]
         elif self.action in ["update", "partial_update"]:
-            self.permission_classes = [IsAuthenticated, IsModerPermission | IsOwnerOrStaff]
+            self.permission_classes = [
+                IsAuthenticated,
+                IsModerPermission | IsOwnerOrStaff,
+            ]
         elif self.action == "retrieve":
             self.permission_classes = [IsAuthenticated]
         return super().get_permissions()
@@ -47,10 +53,11 @@ class LessonListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        course_id = self.kwargs.get('course_id')
+        course_id = self.kwargs.get("course_id")
         if course_id:
             queryset = queryset.filter(course_id=course_id)
         return queryset
+
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
     serializer_class = LessonSerializer
