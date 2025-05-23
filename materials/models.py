@@ -1,5 +1,7 @@
 from django.db import models
 
+from config import settings
+
 
 # Create your models here.
 class Course(models.Model):
@@ -14,6 +16,10 @@ class Course(models.Model):
     description = models.TextField(null=True, blank=True, verbose_name="Описание курса")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True
+    )
 
     class Meta:
         verbose_name = "курс"
@@ -31,9 +37,14 @@ class Lesson(models.Model):
         help_text="Введите название урока",
     )
     preview = models.ImageField(
-        upload_to="materials/lessons/previews/%Y/%m/%d", blank=True, null=True, verbose_name="Превью урока"
+        upload_to="materials/lessons/previews/%Y/%m/%d",
+        blank=True,
+        null=True,
+        verbose_name="Превью урока",
     )
-    description = models.TextField(max_length=1000, null=True, blank=True, verbose_name="Описание урока")
+    description = models.TextField(
+        max_length=1000, null=True, blank=True, verbose_name="Описание урока"
+    )
     link_to_the_video = models.URLField(
         verbose_name="Ссылка на видео", help_text="Укажите ссылку на видео урока"
     )
@@ -43,6 +54,10 @@ class Lesson(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True
+    )
 
     class Meta:
         verbose_name = "урок"
