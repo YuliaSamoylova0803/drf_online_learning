@@ -1,6 +1,8 @@
+from dataclasses import field
+
 from rest_framework import serializers
 from .models import Course, Lesson
-
+from .validators import StrictYouTubeLinkValidator
 
 class CourseSerializer(serializers.ModelSerializer):
 
@@ -15,7 +17,9 @@ class LessonSerializer(serializers.ModelSerializer):
         model = Lesson
         fields = "__all__"
         read_only_fields = ["created_at", "updated_at"]
-
+        validators = [
+            StrictYouTubeLinkValidator(field="link_to_the_video"),
+        ]
 
 class CourseDetailSerializer(serializers.ModelSerializer):
     lessons_count = serializers.SerializerMethodField()
