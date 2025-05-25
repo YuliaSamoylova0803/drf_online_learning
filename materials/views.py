@@ -8,11 +8,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from .paginators import MaterialsPaginator
 
 
 # Create your views here.
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
+    pagination_class = MaterialsPaginator
 
     def get_serializer_class(self):
         if self.action == "retrieve":
@@ -54,6 +56,7 @@ class LessonListAPIView(generics.ListAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
     permission_classes = (AllowAny,)
+    pagination_class = MaterialsPaginator
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -92,9 +95,9 @@ class SubscriptionAPIView(APIView):
 
         if subscription.exists():
             subscription.delete()
-            message = 'Подписка удалена'
+            message = "Подписка удалена"
         else:
             Subscribe.objects.create(user=user, course=course)
-            message = 'Подписка удалена'
+            message = "Подписка удалена"
 
         return Response({"message": message}, status=status.HTTP_200_OK)
