@@ -19,7 +19,6 @@ class IsOwnerOrStaff(BasePermission):
         - Полный доступ для staff
         - Редактирование только своего профиля для обычных пользователей
         """
-        if view.action == "retrieve":
-            # Просмотр профиля разрешен всем аутентифицированным
-            return True
-        return request.user.is_staff or obj == request.user
+        if request.method in permissions.SAFE_METHODS:
+           return True
+        return request.user.is_staff or obj.owner == request.user
