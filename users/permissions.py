@@ -20,5 +20,5 @@ class IsOwnerOrStaff(BasePermission):
         - Редактирование только своего профиля для обычных пользователей
         """
         if request.method in permissions.SAFE_METHODS:
-           return True
+            return True
         return request.user.is_staff or obj.owner == request.user

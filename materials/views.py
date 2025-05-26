@@ -2,7 +2,12 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from users.permissions import IsModerPermission, IsOwnerOrStaff
 from .models import Course, Lesson, Subscribe
-from .serializers import CourseSerializer, LessonSerializer, CourseDetailSerializer, SubscribeSerializer
+from .serializers import (
+    CourseSerializer,
+    LessonSerializer,
+    CourseDetailSerializer,
+
+)
 from rest_framework import viewsets, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -27,7 +32,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         elif self.action == "destroy":
             self.permission_classes = [
                 IsAuthenticated,
-                ~IsModerPermission,
+                # ~IsModerPermission,
                 IsOwnerOrStaff,
             ]
         elif self.action in ["update", "partial_update"]:
@@ -97,7 +102,7 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
 class SubscriptionAPIView(APIView):
     """Управление подписками на курсы"""
 
-    def post(self,  request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         user = request.user
         course_id = request.data.get("course_id")
         course = get_object_or_404(Course, id=course_id)
@@ -109,6 +114,6 @@ class SubscriptionAPIView(APIView):
             message = "Подписка удалена"
         else:
             Subscribe.objects.create(user=user, course=course)
-            message = "Подписка удалена"
+            message = "Подписка добавлена"
 
         return Response({"message": message}, status=status.HTTP_200_OK)

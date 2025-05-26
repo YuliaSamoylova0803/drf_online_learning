@@ -17,5 +17,5 @@ class StrictYouTubeLinkValidator:
         parsed_url = urlparse(field_value)
         domain = parsed_url.netloc.lower()
 
-        if not ('youtube.com' in domain or 'youtu.be' in domain):
+        if not ("youtube.com" in domain or "youtu.be" in domain):
             raise ValidationError("Разрешены только ссылки на YouTube")
