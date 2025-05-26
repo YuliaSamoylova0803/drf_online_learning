@@ -67,12 +67,14 @@ class LessonListAPIView(generics.ListAPIView):
 
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
+    action = "retrieve"
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
     permission_classes = [IsAuthenticated, IsModerPermission | IsOwnerOrStaff]
 
 
 class LessonUpdateAPIView(generics.UpdateAPIView):
+    action = "update"
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
     permission_classes = [IsAuthenticated, IsModerPermission | IsOwnerOrStaff]
@@ -80,7 +82,16 @@ class LessonUpdateAPIView(generics.UpdateAPIView):
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
     queryset = Lesson.objects.all()
-    permission_classes = [IsAuthenticated, ~IsModerPermission, IsOwnerOrStaff]
+    serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrStaff]
+
+    def get_queryset(self):
+        print("Delete operation requested by:", self.request.user)
+        return super().get_queryset()
+
+    def perform_destroy(self, instance):
+        # Дополнительные проверки перед удалением
+        super().perform_destroy(instance)
 
 
 class SubscriptionAPIView(APIView):
