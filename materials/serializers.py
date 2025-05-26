@@ -1,5 +1,3 @@
-from dataclasses import field
-
 from rest_framework import serializers
 from .models import Course, Lesson, Subscribe
 from .validators import StrictYouTubeLinkValidator
@@ -24,6 +22,9 @@ class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
         fields = "__all__"
+        extra_kwargs = {
+            'owner': {'read_only': True}
+        }
         read_only_fields = ["created_at", "updated_at"]
         validators = [
             StrictYouTubeLinkValidator(field="link_to_the_video"),
@@ -45,6 +46,9 @@ class CourseDetailSerializer(serializers.ModelSerializer):
             "updated_at",
             "lessons_count",  # Добавляем новое поле в список полей
             "lessons",
+            "is_subscribed",  # Добавьте это поле в список
+            "owner"  # Если нужно поле владельца
+
         ]
         read_only_fields = [
             "created_at",
