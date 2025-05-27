@@ -6,7 +6,6 @@ from .serializers import (
     CourseSerializer,
     LessonSerializer,
     CourseDetailSerializer,
-
 )
 from rest_framework import viewsets, generics
 from rest_framework.views import APIView
