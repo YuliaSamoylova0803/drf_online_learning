@@ -56,7 +56,7 @@ class Lesson(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Владелец"
     )
 
     class Meta:
@@ -66,3 +66,21 @@ class Lesson(models.Model):
 
     def __str__(self):
         return f"{self.title}: {self.description}"
+
+
+class Subscribe(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="subscriptions"
+    )
+    course = models.ForeignKey(
+        Course, on_delete=models.CASCADE, related_name="subscriptions"
+    )
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "course")
+        verbose_name = "подписка"
+        verbose_name_plural = "подписки"
+
+    def __str__(self):
+        return f"{self.user} - {self.course}"
