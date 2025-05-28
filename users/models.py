@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MinValueValidator
 from django.db import models
+from rest_framework.exceptions import ValidationError
 
 from materials.models import Course, Lesson
 
@@ -59,6 +60,14 @@ class Payment(models.Model):
         ("cash", "Наличные"),
         ("transfer", "Перевод на счет"),
     ]
+
+    PAYMENT_STATUS_CHOICES = [
+        ('pending', 'Ожидает оплаты'),
+        ('paid', 'Оплачено'),
+        ('failed', 'Ошибка оплаты'),
+        ('refunded', 'Возврат'),
+    ]
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -76,7 +85,6 @@ class Payment(models.Model):
         verbose_name="Оплаченный курс",
         related_name="payments",
     )
-
     paid_lesson = models.ForeignKey(
         Lesson,
         on_delete=models.SET_NULL,
@@ -86,10 +94,30 @@ class Payment(models.Model):
         related_name="payments",
     )
     amount = models.DecimalField(
-        max_digits=10, decimal_places=2, verbose_name="Суммам оплаты"
+        max_digits=10, decimal_places=2, verbose_name="Сумма оплаты", validators=[MinValueValidator(0)]
     )
     payment_method = models.CharField(
         max_length=20, choices=PAYMENT_METHOD_CHOICES, verbose_name="Способ оплаты"
+    )
+    status = models.CharField(
+        max_length=10,
+        choices=PAYMENT_STATUS_CHOICES,
+        default='pending',
+        verbose_name="Статус платежа"
+    )
+    payment_id = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="ID платежа в системе",
+        unique=True
+    )
+    link = models.URLField(
+        max_length=400,
+        null=True,
+        blank=True,
+        verbose_name="Ссылка на оплату",
+        help_text="Укажите ссылку на оплату"
     )
 
     class Meta:
@@ -97,5 +125,27 @@ class Payment(models.Model):
         verbose_name_plural = "платежи"
         ordering = ["-date_of_payment"]
 
+
+    def clean(self):
+        if self.paid_course and self.paid_lesson:
+            raise ValidationError("Платеж может быть привязан только к курсу ИЛИ к уроку, но не к обоим одновременно")
+        if not self.paid_course and not self.paid_lesson:
+            raise ValidationError("Платеж должен быть привязан либо к курсу, либо к уроку")
+
+    @property
+    def payment_for(self):
+        if self.paid_course:
+            return f"Курс: {self.paid_course.title}"
+        elif self.paid_lesson:
+            return f"Урок: {self.paid_lesson.title} (Курс: {self.paid_lesson.course.title})"
+        return "Не указано"
+
     def __str__(self):
-        return f"{self.user.email} - {self.amount} ({self.date_of_payment})"
+        items = []
+        if self.paid_course:
+            items.append(f"курс {self.paid_course.title}")
+        if self.paid_lesson:
+            items.append(f"урок {self.paid_lesson.title}")
+
+        subject = " и ".join(items) if items else "не указано"
+        return f"Платеж {self.amount} от {self.user.email} за {subject} ({self.date_of_payment})"
