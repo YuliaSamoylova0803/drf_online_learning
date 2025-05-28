@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from users.permissions import IsModerPermission, IsOwnerOrStaff
@@ -16,6 +18,9 @@ from .paginators import MaterialsPaginator
 
 
 # Create your views here.
+@method_decorator(name='list', decorator=swagger_auto_schema(
+    operation_description="description from swagger_auto_schema via method_decorator"
+))
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     pagination_class = MaterialsPaginator
