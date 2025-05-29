@@ -62,10 +62,10 @@ class Payment(models.Model):
     ]
 
     PAYMENT_STATUS_CHOICES = [
-        ('pending', 'Ожидает оплаты'),
-        ('paid', 'Оплачено'),
-        ('failed', 'Ошибка оплаты'),
-        ('refunded', 'Возврат'),
+        ("pending", "Ожидает оплаты"),
+        ("paid", "Оплачено"),
+        ("failed", "Ошибка оплаты"),
+        ("refunded", "Возврат"),
     ]
 
     user = models.ForeignKey(
@@ -94,7 +94,10 @@ class Payment(models.Model):
         related_name="payments",
     )
     amount = models.DecimalField(
-        max_digits=10, decimal_places=2, verbose_name="Сумма оплаты", validators=[MinValueValidator(0)]
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Сумма оплаты",
+        validators=[MinValueValidator(0)],
     )
     payment_method = models.CharField(
         max_length=20, choices=PAYMENT_METHOD_CHOICES, verbose_name="Способ оплаты"
@@ -102,22 +105,22 @@ class Payment(models.Model):
     status = models.CharField(
         max_length=10,
         choices=PAYMENT_STATUS_CHOICES,
-        default='pending',
-        verbose_name="Статус платежа"
+        default="pending",
+        verbose_name="Статус платежа",
     )
     payment_id = models.CharField(
         max_length=100,
         blank=True,
         null=True,
         verbose_name="ID платежа в системе",
-        unique=True
+        unique=True,
     )
     link = models.URLField(
         max_length=400,
         null=True,
         blank=True,
         verbose_name="Ссылка на оплату",
-        help_text="Укажите ссылку на оплату"
+        help_text="Укажите ссылку на оплату",
     )
 
     class Meta:
@@ -125,12 +128,15 @@ class Payment(models.Model):
         verbose_name_plural = "платежи"
         ordering = ["-date_of_payment"]
 
-
     def clean(self):
         if self.paid_course and self.paid_lesson:
-            raise ValidationError("Платеж может быть привязан только к курсу ИЛИ к уроку, но не к обоим одновременно")
+            raise ValidationError(
+                "Платеж может быть привязан только к курсу ИЛИ к уроку, но не к обоим одновременно"
+            )
         if not self.paid_course and not self.paid_lesson:
-            raise ValidationError("Платеж должен быть привязан либо к курсу, либо к уроку")
+            raise ValidationError(
+                "Платеж должен быть привязан либо к курсу, либо к уроку"
+            )
 
     @property
     def payment_for(self):

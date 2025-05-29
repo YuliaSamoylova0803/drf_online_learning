@@ -8,4 +8,5 @@ class CourseAdmin(admin.ModelAdmin):
             obj.owner = request.user
         super().save_model(request, obj, form, change)
 
+
 admin.site.register(Course, CourseAdmin)

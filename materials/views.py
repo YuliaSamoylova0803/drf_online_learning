@@ -18,9 +18,12 @@ from .paginators import MaterialsPaginator
 
 
 # Create your views here.
-@method_decorator(name='list', decorator=swagger_auto_schema(
-    operation_description="description from swagger_auto_schema via method_decorator"
-))
+@method_decorator(
+    name="list",
+    decorator=swagger_auto_schema(
+        operation_description="description from swagger_auto_schema via method_decorator"
+    ),
+)
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     pagination_class = MaterialsPaginator

@@ -2,7 +2,7 @@ import stripe
 
 
 from config.settings import STRIPE_API_KEY
-from forex_python.converter import CurrencyRates
+
 
 stripe.api_key = STRIPE_API_KEY
 
@@ -55,16 +55,18 @@ def create_payment_link(amount, product_name):
     try:
         session = stripe.checkout.Session.create(
             payment_method_types=["card"],
-            line_items=[{
-                'price_data': {
-                    'currency': 'rub',
-                    'product_data': {
-                        'name': product_name,
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "rub",
+                        "product_data": {
+                            "name": product_name,
+                        },
+                        "unit_amount": int(amount * 100),
                     },
-                    "unit_amount": int(amount * 100),
-                },
-                "quantity": 1,
-            }],
+                    "quantity": 1,
+                }
+            ],
             mode="payment",
             success_url="https://127.0.0.1:8000/users/payments/success/",
             cancel_url="https://127.0.0.1:8000/users/payments/cancel/",

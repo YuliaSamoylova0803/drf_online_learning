@@ -91,25 +91,25 @@ class SimplePaymentView(APIView):
             paid_course_id=request.data.get("course_id"),
             paid_lesson_id=request.data.get("lesson_id"),
             amount=request.data.get("amount"),
-            status="pending"
+            status="pending",
         )
         # Получаем название продукта
         product_name = (
-            payment.paid_course.title if payment.paid_course
+            payment.paid_course.title
+            if payment.paid_course
             else payment.paid_lesson.title
         )
 
         # Создаем ссылку на оплату
         payment_url, payment_id = create_payment_link(
-            amount=payment.amount,
-            product_name=product_name
+            amount=payment.amount, product_name=product_name
         )
 
         if not payment_url:
             payment.delete()
             return Response(
-                {'error': payment_id},  # Здесь payment_id содержит текст ошибки
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": payment_id},  # Здесь payment_id содержит текст ошибки
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Сохраняем данные платежа
@@ -122,7 +122,7 @@ class SimplePaymentView(APIView):
                 "payment_id": payment.id,
                 "payment_url": payment_url,
                 "amount": payment.amount,
-                "product": product_name
+                "product": product_name,
             },
-            status=status.HTTP_201_CREATED
+            status=status.HTTP_201_CREATED,
         )

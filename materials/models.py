@@ -18,7 +18,9 @@ class Course(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, help_text="Пользователь, который создал курс"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        help_text="Пользователь, который создал курс",
     )
 
     class Meta:
@@ -56,7 +58,10 @@ class Lesson(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Владелец", help_text="Пользователь, который создал урок"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name="Владелец",
+        help_text="Пользователь, который создал урок",
     )
 
     class Meta:
