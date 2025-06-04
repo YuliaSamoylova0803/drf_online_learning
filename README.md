@@ -20,6 +20,10 @@
 - poetry add drf-yasg
 - poetry add stripe
 - poetry add forex-python
+- poetry add celery
+- poetry add eventlet
+- poetry add redis
+- poetry add django-celery-beat
 
 
 ## Использование:
@@ -54,6 +58,9 @@
 + Подключен и настроен вывод документации для проекта через библиотеку drf-yasg(выводится в swagger и redoc)
 + Реализована возможность оплаты курсов через https://stripe.com/docs/api
 + Напишите тесты, которые будут проверять корректность работы, coverage 88 %
++ Настроен проект для работы с Celery
++ Реализован функционал подписки на обновление курсов
++ С помощью celery-beat описана фоновая задача, которая будет проверять пользователей по дате последнего входа
 + Сервер запускается с помощью команды python manage.py runserver
 + Сервер останавливается командой CTRL+C
 
