@@ -6,14 +6,17 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 @shared_task
 def send_course_update_notification(course_id):
     try:
-        subscriptions = Subscribe.objects.filter(course_id=course_id).select_related("user")
+        subscriptions = Subscribe.objects.filter(course_id=course_id).select_related(
+            "user"
+        )
         for subscription in subscriptions:
             send_mail(
-                subject='Обновление материалов курса',
-                message='Курс, на который вы подписаны, был обновлен. Проверьте новые материалы!',
+                subject="Обновление материалов курса",
+                message="Курс, на который вы подписаны, был обновлен. Проверьте новые материалы!",
                 from_email=settings.EMAIL_HOST_USER,
                 recipient_list=[subscription.user.email],
                 fail_silently=False,
