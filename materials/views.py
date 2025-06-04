@@ -1,3 +1,6 @@
+from datetime import timezone
+
+from django.contrib.admin import action
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -15,7 +18,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .paginators import MaterialsPaginator
-
+from .tasks import send_course_update_notification
+from datetime import timedelta
+from django.utils import timezone
 
 # Create your views here.
 @method_decorator(
@@ -54,6 +59,16 @@ class CourseViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
+    def perform_update(self, serializer):
+        instance = serializer.save()
+
+        # Проверяем, что курс не обновлялся более 4 часов
+        if (timezone.now() - instance.updated_at) > timedelta(hours=4):
+            # Отправляем задачу на рассылку уведомлений
+            send_course_update_notification.delay(instance.id)
+
+        return instance
+
 
 class LessonCreateAPIView(generics.CreateAPIView):
     serializer_class = LessonSerializer
@@ -90,6 +105,20 @@ class LessonUpdateAPIView(generics.UpdateAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
     permission_classes = [IsAuthenticated, IsModerPermission | IsOwnerOrStaff]
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+
+        # Обновляем дату изменения родительского курса
+        course = instance.course
+        course.save()  # Это обновит поле updated_at курса
+
+        # Проверяем, что курс не обновлялся более 4 часов
+        if (timezone.now() - course.updated_at) > timedelta(hours=4):
+            # Отправляем задачу на рассылку уведомлений
+            send_course_update_notification.delay(course.id)
+
+        return instance
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
