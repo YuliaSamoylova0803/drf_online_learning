@@ -1,6 +1,6 @@
 from datetime import timezone
 
-from django.contrib.admin import action
+
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -20,7 +20,7 @@ from django.shortcuts import get_object_or_404
 from .paginators import MaterialsPaginator
 from .tasks import send_course_update_notification
 from datetime import timedelta
-from django.utils import timezone
+
 
 # Create your views here.
 @method_decorator(
