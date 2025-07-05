@@ -34,6 +34,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.13'
+
       - name: Install Poetry
         run: |
             curl -sSL https://install.python-poetry.org | python3 -
@@ -42,11 +43,24 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-root
 
+      - name: Prepare directories
+        run: |
+          mkdir -p static
+          mkdir -p media
+
+      - name: Run migrations
+        run: |
+          echo "SECRET_KEY=test-secret-key-for-ci" > .env
+          echo "DEBUG=True" >> .env
+          echo "DATABASE_URL=sqlite:///db.sqlite3" >> .env
+          poetry run python manage.py migrate
+
       - name: Run tests
         env:
-          SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}  # Добавьте секрет в настройки репозитория
+          SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+          DJANGO_SETTINGS_MODULE: 'config.settings'
         run: |
-          echo "SECRET_KEY=$SECRET_KEY" > .env
+          echo "SECRET_KEY=$SECRET_KEY" >> .env
           poetry run python manage.py test
 
   build:
@@ -78,12 +92,9 @@ jobs:
 
       - name: Deploy to Server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@$
-          {{ secrets.SERVER_IP }} << 'EOF'
-          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/my_app:$
-          {{ github.sha }}
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/my_app:${{ github.sha }}
           docker stop my_app || true
           docker rm my_app || true
-          docker run -d --name my_app -p 80:8000 ${{ secrets.DOCKER_HUB_USERNAME 
-          }}/my_app:${{ github.sha }}
+          docker run -d --name my_app -p 80:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/my_app:${{ github.sha }}
           EOF
