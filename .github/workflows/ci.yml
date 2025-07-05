@@ -43,7 +43,11 @@ jobs:
         run: poetry install --no-root
 
       - name: Run tests
-        run: poetry run python manage.py test
+        env:
+          SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}  # Добавьте секрет в настройки репозитория
+        run: |
+          echo "SECRET_KEY=$SECRET_KEY" > .env
+          poetry run python manage.py test
 
   build:
     needs: test
