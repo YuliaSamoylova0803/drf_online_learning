@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:13-alpine
+    image: postgres:14-alpine
     env_file: .env
     environment:
       POSTGRES_DB: ${NAME}
@@ -15,6 +15,22 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - backend_network
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - backend
     networks:
       - backend_network
 
@@ -36,7 +52,7 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - REDIS_URL=redis://redis:6379/0
     volumes:
-      - .:/app
+      - static_volume:/app/static
       - media_volume:/app/media
     ports:
       - "8000:8000"
@@ -53,30 +69,35 @@ services:
     command: celery -A config worker --loglevel=info
     env_file: .env
     volumes:
-      - .:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
     depends_on:
       - db
       - redis
       - backend
     networks:
       - backend_network
+    restart: unless-stopped
 
   celery_beat:
     build: .
     command: celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     env_file: .env
     volumes:
-      - .:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
     depends_on:
       - db
       - redis
       - backend
     networks:
       - backend_network
+    restart: unless-stopped
 
 volumes:
   postgres_data:
   redis_data:
+  static_volume:
   media_volume:  # Для постоянного хранения медиафайлов
 
 networks:
