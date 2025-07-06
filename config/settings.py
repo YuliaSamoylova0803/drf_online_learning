@@ -148,6 +148,10 @@ MEDIA_URL = "/media/"
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
+# Создаем media и static если их нет
+os.makedirs(BASE_DIR / 'media', exist_ok=True)
+os.makedirs(BASE_DIR / 'static', exist_ok=True)
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
