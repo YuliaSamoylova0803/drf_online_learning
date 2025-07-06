@@ -128,3 +128,60 @@ docker-compose exec backend coverage report
 
 
 docker-compose exec backend python manage.py createsuperuser
+
+
+# Инструкция по деплою приложения
+
+## Подготовка сервера
+
+1. **Установите необходимые пакеты**:
+   ```bash
+   sudo apt update
+   sudo apt install -y docker.io nginx
+   sudo systemctl enable --now docker nginx
+   
+2. **Настройте Nginx как reverse proxy**:
+
+sudo nano /etc/nginx/sites-available/my_app
+
+Вставьте конфигурацию:
+
+
+server {
+    listen 80;
+    server_name ваш-домен.ru;  # Или IP-адрес сервера
+
+    location / {
+        proxy_pass http://localhost:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+**Активируйте**:
+
+sudo ln -s /etc/nginx/sites-available/my_app /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl restart nginx
+
+## Настройка GitHub Actions
+Добавьте секреты в репозиторий:
+
+-SSH_KEY - Приватный SSH-ключ для доступа к серверу
+
+-SERVER_IP - IP-адрес сервера
+
+SSH_USER - Имя пользователя (обычно root или ubuntu)
+
+DOCKER_HUB_USERNAME - Логин Docker Hub
+
+DEPLOY_DIR - директория
+
+DJANGO_SECRET_KEY - ключ Django
+
+DOCKER_HUB_TOKEN - ключ Docker Hub
+
+### Запустите workflow:
+
+Пушите изменения в ветку main (деплой запустится автоматически)
+
+Или вручную через Actions → "Django CI" → Run workflow
