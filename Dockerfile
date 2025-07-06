@@ -28,9 +28,9 @@ RUN poetry config virtualenvs.create false && \
 # Копируем исходный код приложения в контейнер
 COPY . .
 
-# Устанавливаем права на запись в media/static
-RUN chmod -R 755 /app/media /app/static && \
-    mkdir -p /var/log/gunicorn/
+# Создаем необходимые директории и устанавливаем права
+RUN mkdir -p /app/media /app/static /var/log/gunicorn/ && \
+    chmod -R 755 /app/media /app/static
 
 # Пробрасываем порт, который будет использовать Django
 EXPOSE 8000
@@ -40,6 +40,6 @@ ENV PYTHONUNBUFFERED=1 \
     DJANGO_SETTINGS_MODULE=config.settings \
     GUNICORN_CMD_ARGS="--bind=0.0.0.0:8000 --workers=3 --timeout=60 --access-logfile=/var/log/gunicorn/access.log --error-logfile=/var/log/gunicorn/error.log"
 
-# Запуск через Gunicorn для production
-CMD ["gunicorn", "config.wsgi:application"]
+# Команда для запуска
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "config.wsgi:application"]
 
