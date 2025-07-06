@@ -25,6 +25,20 @@ jobs:
   test:
     needs: lint
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Check out code
@@ -37,11 +51,13 @@ jobs:
 
       - name: Install Poetry
         run: |
-            curl -sSL https://install.python-poetry.org | python3 -
-            echo "export PATH=\"$HOME/.local/bin:$PATH\"" >> $GITHUB_ENV
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "export PATH=\"$HOME/.local/bin:$PATH\"" >> $GITHUB_ENV
 
       - name: Install dependencies
-        run: poetry install --no-root
+        run: |
+          poetry install --no-root
+          poetry run pip install psycopg2-binary
 
       - name: Prepare directories
         run: |
@@ -49,18 +65,26 @@ jobs:
           mkdir -p media
 
       - name: Run migrations
+        env:
+          NAME: test_db
+          USER: postgres
+          PASSWORD: postgres
+          HOST: localhost
+          PORT: 5432
+          SECRET_KEY: django-insecure-test-key
         run: |
-          echo "SECRET_KEY=test-secret-key-for-ci" > .env
-          echo "DEBUG=True" >> .env
-          echo "DATABASE_URL=sqlite:///db.sqlite3" >> .env
           poetry run python manage.py migrate
 
       - name: Run tests
         env:
-          SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
-          DJANGO_SETTINGS_MODULE: 'config.settings'
+          NAME: test_db
+          USER: postgres
+          PASSWORD: postgres
+          HOST: localhost
+          PORT: 5432
+          SECRET_KEY: django-insecure-test-key
+          DEBUG: "True"
         run: |
-          echo "SECRET_KEY=$SECRET_KEY" >> .env
           poetry run python manage.py test
 
   build:
