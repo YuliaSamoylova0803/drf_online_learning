@@ -111,24 +111,24 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-
     steps:
-      - name: Add SSH Key
+      - name: Set up SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Deploy to Server
+      - name: Deploy with Nginx proxy
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-          # Принудительная очистка
-          sudo systemctl stop docker || true
-          sudo rm -rf /var/lib/docker/tmp
-          sudo mkdir -p /var/lib/docker/tmp
-          sudo chmod 777 /var/lib/docker/tmp
-          sudo systemctl start docker
+          # Останавливаем старый контейнер
+          docker rm -f my_app || true
 
-          # Деплой
+          # Скачиваем новый образ
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/my_app:${{ github.sha }}
-          docker run -d --name my_app -p 80:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/my_app:${{ github.sha }}
+
+          # Запускаем контейнер на порту 8000 (для Nginx)
+          docker run -d --name my_app -p 8000:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/my_app:${{ github.sha }}
+
+          # Проверяем конфиг Nginx
+          sudo nginx -t && sudo systemctl restart nginx
           EOF
