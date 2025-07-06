@@ -121,8 +121,14 @@ jobs:
       - name: Deploy to Server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          # Принудительная очистка
+          sudo systemctl stop docker || true
+          sudo rm -rf /var/lib/docker/tmp
+          sudo mkdir -p /var/lib/docker/tmp
+          sudo chmod 777 /var/lib/docker/tmp
+          sudo systemctl start docker
+
+          # Деплой
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/my_app:${{ github.sha }}
-          docker stop my_app || true
-          docker rm my_app || true
           docker run -d --name my_app -p 80:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/my_app:${{ github.sha }}
           EOF
