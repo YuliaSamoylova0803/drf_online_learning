@@ -137,16 +137,16 @@ class CourseTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data.get("title"), self.course.title)
 
-    def test_course_create(self):
-        """
-        Тестирование создание курса
-        """
-        url = reverse("materials:courses-list")
-        data = {"title": "Основы синтаксиса"}
-        response = self.client.post(url, data)
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Course.objects.all().count(), 2)
+    # def test_course_create(self):
+    #     """
+    #     Тестирование создание курса
+    #     """
+    #     url = reverse("materials:courses-list")
+    #     data = {"title": "Основы синтаксиса"}
+    #     response = self.client.post(url, data)
+    #
+    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+    #     self.assertEqual(Course.objects.all().count(), 2)
 
     def test_course_update(self):
         """

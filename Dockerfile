@@ -22,20 +22,24 @@ COPY pyproject.toml poetry.lock ./
 
 # Устанавливаем зависимости проекта
 RUN poetry config virtualenvs.create false && \
-    poetry install --no-interaction --no-ansi --only main
+    poetry install --no-interaction --no-ansi --only main && \
+    pip install gunicorn
 
 # Копируем исходный код приложения в контейнер
 COPY . .
 
-# Устанавливаем права на запись в media/static
-RUN chmod -R 755 /app/media /app/static
+# Создаем необходимые директории и устанавливаем права
+RUN mkdir -p /app/media /app/static /var/log/gunicorn/ && \
+    chmod -R 755 /app/media /app/static
 
 # Пробрасываем порт, который будет использовать Django
 EXPOSE 8000
 
 # Переменные окружения (лучше перенести в docker-compose или .env)
 ENV PYTHONUNBUFFERED=1 \
-    DJANGO_SETTINGS_MODULE=config.settings
+    DJANGO_SETTINGS_MODULE=config.settings \
+    GUNICORN_CMD_ARGS="--bind=0.0.0.0:8000 --workers=3 --timeout=60 --access-logfile=/var/log/gunicorn/access.log --error-logfile=/var/log/gunicorn/error.log"
 
-# Команда для запуска приложения
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Команда для запуска
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "config.wsgi:application"]
+
